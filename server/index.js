@@ -4,7 +4,9 @@ const express = require("express")
  ,cookieParser = require("cookie-parser")
  ,passport = require("passport")
  ,app = express();
-
+  dir = './build',
+  indexDir = '/build/index.html'
+ , path = require("path");
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
@@ -34,6 +36,18 @@ app.use(cors(corsOptions));
 app.use(passport.initialize());
 
 app.use("/users", userRouter);
+
+app.use('/static', express.static(path.join(__dirname, 'public')))
+app.use(express.static(dir));
+
+app.use((req, res) => {
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  whitelistedDomains = whitelist;
+  if (!whitelistedDomains.includes(req.header('origin'))) {
+      res.removeHeader("Access-Control-Allow-Origin");
+  }
+  res.sendFile(path.join(__dirname + indexDir));
+});
 
 //health-check api
 app.get("/health-check", function (req, res) {
